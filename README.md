@@ -1,195 +1,117 @@
-\# Proposal Classification System
+# 📄 Klasifikasi Proposal dengan NLP
 
-Klasifikasi Proposal Lolos / Tidak Lolos Menggunakan NLP (Transformer)
+Sistem untuk mengklasifikasikan proposal menjadi Lolos/Tidak Lolos menggunakan NLP dan Machine Learning.
 
-\## 📌 Deskripsi
+## � Penjelasan Langkah-langkah
 
-Repository ini berisi sistem \*\*machine learning berbasis Natural Language Processing (NLP)\*\* untuk mengklasifikasikan dokumen proposal (PDF) ke dalam dua kelas:
+1. **Ekstrak Teks dari PDF** (`pdf_parser.py`)
+   - Membaca file PDF dari folder `dataset/raw/`
+   - Mengekstrak teks dari setiap halaman
+   - Menyimpan teks hasil ekstraksi ke folder `dataset/proses/`
 
-\- \*\*Lolos\*\*
+2. **Membangun Dataset** (`build_dataset.py`)
+   - Menggabungkan teks dari semua file
+   - Memberi label otomatis berdasarkan folder asal (lolos/tidak_lolos)
+   - Menyimpan dalam format JSONL yang rapi
 
-\- \*\*Tidak Lolos\*\*
+3. **Tokenisasi** (`tokenize_dataset.py`)
+   - Memotong teks menjadi token (kata/kalimat)
+   - Mengubah teks menjadi angka (numerical)
+   - Menambahkan padding/truncate ke 512 token
+   - Membagi data menjadi training & testing
 
-Sistem menggunakan pendekatan \*\*fine-tuning Transformer (DistilBERT / BERT-Tiny)\*\* dan dirancang untuk kebutuhan \*\*penelitian akademik / skripsi\*\*.
+4. **Training Model** (`train.py`)
+   - Membangun arsitektur model
+   - Melatih model dengan data training
+   - Mengevaluasi performa dengan data testing
+   - Menyimpan model terlatih ke folder `model/`
 
-Alur kerja sistem:
+5. **Prediksi** (`predict.py`)
+   - Menerima input file PDF baru
+   - Melakukan preprocessing yang sama
+   - Memprediksi kelas (Lolos/Tidak Lolos)
+   - Menampilkan hasil prediksi dan confidence score
 
-PDF Proposal → Parsing Teks → Dataset → Tokenisasi → Training → Prediksi
+## �🚀 Cara Menggunakan
 
-\---
+### 1. Persiapan
+```bash
+# Buat virtual environment
+python -m venv venv
+venv\Scripts\activate
 
-\## 🧱 Struktur Folder
-
-project-root/
-
-│
-
-├── src/
-
-│ ├── pdf\_parser.py # Parsing PDF → teks terurut
-
-│ ├── build\_dataset.py # Membangun dataset JSONL
-
-│ ├── tokenize\_dataset.py # Tokenisasi dataset
-
-│ ├── train.py # Training model
-
-│ └── predict.py # Prediksi proposal baru
-
-│
-
-├── dataset/
-
-│ ├── raw/
-
-│ │ ├── lolos/ # PDF proposal lolos
-
-│ │ └── tidak\_lolos/ # PDF proposal tidak lolos
-
-│ └── proses/ # Dataset hasil parsing & tokenisasi
-
-│
-
-├── data/
-
-│ └── uji/
-
-│ └── proposal\_baru.pdf # Contoh proposal untuk prediksi
-
-│
-
-├── models/ # Model hasil training (tidak di-commit)
-
-├── requirements.txt
-
-└── README.md
-
-
-\---
-
-\## ⚙️ Persyaratan Sistem
-
-\- Python \*\*3.9 – 3.10\*\*
-
-\- RAM minimal \*\*8 GB\*\* (CPU training)
-
-\- OS: Windows / Linux / macOS
-
-\> ⚠️ Training dilakukan \*\*CPU-only\*\* untuk menjaga kompatibilitas perangkat.
-
-\---
-
-\## 📦 Instalasi
-
-Disarankan menggunakan virtual environment.
-
-
+# Install requirements
 pip install -r requirements.txt
+```
 
-🚀 Cara Menjalankan (Dari Awal)
+### 2. Struktur Folder
+Buat folder dan letakkan file PDF proposal:
+```
+ML/
+├── dataset/
+│   ├── raw/
+│   │   ├── lolos/       # PDF yang lolos
+│   │   └── tidak_lolos/ # PDF yang tidak lolos
+│   └── proses/          # Hasil pemrosesan
+└── data/
+    └── uji/            # PDF untuk prediksi
+```
 
-1️⃣ Siapkan Dataset PDF
+### 3. Proses Utama
 
-Masukkan proposal ke folder berikut:
+1. **Ekstrak Teks** dari PDF:
+   ```bash
+   python src/pdf_parser.py
+   ```
 
-dataset/raw/lolos/
+2. **Buat Dataset**:
+   ```bash
+   python src/build_dataset.py
+   ```
 
-dataset/raw/tidak\_lolos/
+3. **Tokenisasi**:
+   ```bash
+   python src/tokenize_dataset.py
+   ```
 
-2️⃣ Parsing PDF → Teks
+4. **Training**:
+   ```bash
+   python src/train.py
+   ```
 
-python src/pdf\_parser.py
+5. **Prediksi**:
+   ```bash
+   python src/predict.py --input data/uji/proposal_anda.pdf
+   ```
 
-Output akan disimpan di:
+## 📋 Hasil yang Diharapkan
+- **Model** disimpan di folder `model/`
+- **Laporan evaluasi** di terminal yang menampilkan:
+  - Akurasi model
+  - Loss
+  - Metrik evaluasi lainnya
 
-dataset/proses/
+## 🛠️ Teknologi yang Digunakan
+- **Bahasa Pemrograman**: Python 3.9+
+- **Machine Learning**: PyTorch/TensorFlow
+- **NLP**: Transformers (Hugging Face)
+- **PDF Processing**: PyMuPDF
+- **Data Processing**: Pandas, NumPy
 
-3️⃣ Build Dataset JSONL
+## ⚠️ Catatan Penting
+1. **Persyaratan File**
+   - File PDF tidak boleh terproteksi
+   - Format teks harus terbaca (bukan hasil scan)
 
-python src/build\_dataset.py
+2. **Data Training**
+   - Minimal 10 contoh per kelas
+   - Semakin banyak data, semakin baik hasilnya
 
-Menghasilkan file:
+3. **Keterbatasan**
+   - Maksimal 512 token per dokumen
+   - Performa tergantung kualitas data training
+   - Waktu training bisa lama untuk dataset besar
 
-dataset/proses/dataset.jsonl
-
-4️⃣ Tokenisasi Dataset
-
-python src/tokenize\_dataset.py
-
-Tokenisasi disesuaikan dengan batas 512 token (DistilBERT-safe).
-
-5️⃣ Training Model
-
-python src/train.py
-
-Model hasil training akan disimpan di:
-
-models/
-
-6️⃣ Prediksi Proposal Baru
-
-Letakkan file PDF uji di:
-
-data/uji/proposal\_baru.pdf
-
-Jalankan:
-
-python src/predict.py
-
-Output:
-
-Prediksi kelas: Lolos / Tidak Lolos
-
-Confidence score
-
-🔁 Menjalankan Tanpa Training Ulang
-
-Jika folder models/ sudah berisi model terlatih:
-
-python src/predict.py
-
-Parsing, tokenisasi, dan training tidak perlu diulang.
-
-❌ File yang Tidak Di-Commit ke GitHub
-
-File berikut tidak disarankan masuk repository:
-
-dataset/
-
-models/
-
-File PDF proposal asli
-
-Tambahkan ke .gitignore:
-
-dataset/
-
-models/
-
-data/uji/
-
-🧪 Model & Library
-
-Transformer: DistilBERT / BERT-Tiny
-
-Framework: Hugging Face Transformers
-
-Dataset handling: datasets
-
-PDF parsing: PyMuPDF
-
-📚 Konteks Akademik
-
-Sistem ini dikembangkan untuk penelitian/skripsi dengan topik:
-
-Klasifikasi Proposal Berbasis Dokumen PDF Menggunakan Transformer dan NLP.
-
-👤 Author
-
-Naufal Najib
-
-Informatics / Machine Learning Research
-
-📄 Lisensi
-
-Digunakan untuk keperluan pendidikan dan penelitian.
+---
+**🔄 Versi**: 1.0.0  
+**📅 Update Terakhir**: Januari 2025
